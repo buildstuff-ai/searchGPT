@@ -18,11 +18,11 @@ client = boto3.client(
                 )
 
 #TODO: fix the latency
-def converse_stream_bedrock(model_id: str,
+def converse_stream_bedrock(
                             query: str,
                             search_results: Optional[str]):
     response = client.converse(
-        modelId=model_id,
+        modelId=os.getenv(""),
         messages=[
             {
                 'role': 'user',
@@ -48,34 +48,47 @@ def converse_stream_bedrock(model_id: str,
 
     return response["output"]["message"]
 
+def optimize_query(user_query: str) -> str:
+    system_message = {
+        'text':"You are an AI assistant tasked with optimizing user queries for better search results on the Serper API. "
+        f"Please enhance the following query to make it more specific and effective for searching: {user_query}. "
+        "Return only the optimized query and nothing else."
+
+    }
+
+    messages = [
+        {
+            'role': 'user',
+            'content': [
+                {
+                    'text': user_query
+                }
+            ]
+        }
+    ]
+
+    response = client.converse(
+        modelId=os.getenv("MODEL_ID"),  # Ensure you have the correct model ID
+        messages=messages,
+        system=[system_message]
+    )
+
+    optimized_query = response["output"]["message"]["content"][0]["text"]
+    return optimized_query
 
 if __name__ == '__main__':
     model_id = os.getenv("MODEL_ID")
-    query = "what is the meaning of life?"
-    search_results = """
-    The meaning of life can be defined in many ways, including as the quality that distinguishes a living being from a dead body, or as the capacity for growth, metabolism, and reproduction. It can also be defined as the process of acting, reacting, evaluating, and evolving through growth. 
+    # query = "what is the meaning of life?"
 
-    Merriam-Webster(link)
-    Life Definition & Meaning - Merriam-Webster
-    6 days ago — a. : the quality that distinguishes a vital and functional being from a dead bod...
+    # response = converse_stream_bedrock(model_id=model_id, query=query, search_results=search_results)
+    # response = optimize_query("Web development course for the beginners and intermdiate and advanced")
+    # print(response)
 
-    Philosophy Now(link)
-    What Is Life? | Issue 101 - Philosophy Now
-    Life is the aspect of existence that processes, acts, reacts, evaluates, and evolves throu...
-    Some say that the meaning of life is something that we actively create and define through our actions and experiences. Others say that the meaning of life can be found by recognizing your own gifts and using them to contribute to the world. This could be by helping friends, playing music, or bringing joy to others. 
-    Here are some ways to find meaning in life:
-    Learn about happiness
-    Let your talents lead you to new opportunities
-    Make connections with people who share your interests
-    Set challenging but clear goals
-    Follow your internal compass when making decisions
-    Help others when you can 
+
+
+
+
 """
-    response = converse_stream_bedrock(model_id=model_id, query=query, search_results=search_results)
-
-    print(response)
-
-    """
 {
   "ResponseMetadata": {
     "RequestId": "3c949448-5aa2-1bc1c2ed0873",
