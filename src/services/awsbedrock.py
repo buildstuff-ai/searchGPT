@@ -22,7 +22,7 @@ def converse_stream_bedrock(
                             query: str,
                             search_results: Optional[str]):
     response = client.converse(
-        modelId=os.getenv(""),
+        modelId=os.getenv("MODEL_ID"),
         messages=[
             {
                 'role': 'user',
