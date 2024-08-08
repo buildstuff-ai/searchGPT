@@ -61,6 +61,7 @@ def optimize_query(user_query: str) -> str:
     {
         "optimized_query": "enhanced version of the input query"
     }"""
+
     }
 
     messages = [
