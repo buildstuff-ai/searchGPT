@@ -2,6 +2,7 @@ import os
 import boto3
 from dotenv import load_dotenv
 from typing import List, Dict, Optional
+import json
 load_dotenv()
 
 
@@ -50,9 +51,16 @@ def converse_stream_bedrock(
 
 def optimize_query(user_query: str) -> str:
     system_message = {
-        'text':"You are an AI assistant tasked with optimizing user queries for better search results on the Serper API. "
-        f"Please enhance the following query to make it more specific and effective for searching: {user_query}. "
-        "Return only the optimized query and nothing else."
+   'text': """You are an AI assistant tasked with optimizing user queries for better search results on the Serper API. 
+    Please enhance the following query to make it more specific and effective for searching. 
+    Your response should be formatted in JSON with the key "optimized_query" and the value being the enhanced query. 
+    Ensure the JSON response is clean and free from any additional text or formatting. 
+    Here is the query to be optimized: {user_query}.
+    
+    Example of the expected response format:
+    {
+        "optimized_query": "enhanced version of the input query"
+    }"""
 
     }
 
@@ -74,6 +82,8 @@ def optimize_query(user_query: str) -> str:
     )
 
     optimized_query = response["output"]["message"]["content"][0]["text"]
+    response_json = json.loads(optimized_query)
+    optimized_query = response_json.get("optimized_query", "No optimized query found")
     return optimized_query
 
 if __name__ == '__main__':
